@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>八上历史 第1-6课 知识点默写</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; padding: 20px 10px; }
+.paper { max-width: 800px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.1); padding: 30px; }
+h1 { text-align: center; color: #c00; margin-bottom: 10px; font-size: 1.5em; }
+.subtitle { text-align: center; color: #666; margin-bottom: 25px; font-size: .9em; }
+
+#info-bar { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 25px; }
+#info-bar .field { display: flex; flex-direction: column; align-items: flex-start; width: 75%; }
+#info-bar label { font-weight: bold; margin-bottom: 3px; color: #333; }
+#info-bar input { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+
+.btn { display: inline-block; padding: 10px 28px; background: #c00; color: #fff; border: none; border-radius: 4px; font-size: 1em; cursor: pointer; transition: background .2s; }
+.btn:hover { background: #a00; }
+.btn:disabled { background: #ccc; cursor: not-allowed; }
+.btn-secondary { background: #666; }
+.btn-secondary:hover { background: #555; }
+
+#memorize-page { display: none; }
+#memorize-page h2 { color: #c00; margin-bottom: 15px; }
+#memo-controls { margin-bottom: 15px; text-align: center; }
+#memo-list { list-style: none; padding: 0; }
+#memo-list li { padding: 10px 14px; margin-bottom: 8px; background: #fafafa; border-left: 3px solid #c00; border-radius: 4px; line-height: 1.8; }
+#memo-list li .kw-blank { color: transparent; background: #333; border-radius: 2px; padding: 0 4px; margin: 0 2px; }
+#memo-list li .kw-blank.revealed { color: #c00; background: transparent; font-weight: bold; padding: 0; }
+
+#quiz-page { display: none; }
+#quiz-page h2 { color: #c00; margin-bottom: 15px; }
+#progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-bottom: 15px; overflow: hidden; }
+#progress-fill { height: 100%; background: #c00; width: 0%; transition: width .3s; }
+#timer { text-align: right; color: #666; margin-bottom: 10px; font-size: .9em; }
+#questions { margin-bottom: 20px; }
+.q-item { margin-bottom: 18px; padding: 12px; border: 1px solid #eee; border-radius: 4px; }
+.q-item.correct { border-color: #0a0; background: #f0fff0; }
+.q-item.wrong { border-color: #c00; background: #fff5f5; }
+.q-item .q-text { font-weight: bold; margin-bottom: 8px; }
+.q-item input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin: 4px 4px 4px 0; }
+.q-item .opts label { display: block; padding: 6px; cursor: pointer; }
+.q-item .opts label:hover { background: #f5f5f5; }
+.q-item .ref-answer { margin-top: 8px; padding: 8px; background: #fffbe6; border-radius: 4px; font-size: .9em; display: none; }
+.q-item .sub-inputs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.q-item .sub-inputs input { width: 120px; }
+#submit-area { text-align: center; margin-top: 20px; }
+
+#result { display: none; text-align: center; padding: 30px; }
+#result h2 { color: #c00; margin-bottom: 20px; }
+#result .score { font-size: 2.5em; color: #c00; font-weight: bold; margin: 15px 0; }
+#result .info-line { margin: 8px 0; font-size: 1.1em; }
+#result .wrong-list { text-align: left; max-width: 600px; margin: 20px auto; padding: 15px; background: #fff5f5; border-radius: 4px; }
+#result .wrong-list h3 { color: #c00; margin-bottom: 10px; }
+#result .wrong-list li { margin-bottom: 6px; }
+
+@media (max-width: 600px) {
+  .paper { padding: 15px; }
+  h1 { font-size: 1.2em; }
+  .q-item .sub-inputs input { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="paper">
+  <h1>八年级上册历史（人教版）第1-6课</h1>
+  <p class="subtitle">知识点默写 · 满分100分</p>
+
+  <div id="info-bar">
+    <div class="field">
+      <label for="cls">班级</label>
+      <input id="cls" type="text" placeholder="如：八年级1班">
+    </div>
+    <div class="field">
+      <label for="nm">姓名</label>
+      <input id="nm" type="text" placeholder="你的姓名">
+    </div>
+    <div class="field">
+      <label for="no">座号</label>
+      <input id="no" type="text" placeholder="座号">
+    </div>
+    <button class="btn" id="btn-start-memo" disabled style="margin-top:10px;">开始背诵</button>
+  </div>
+
+  <div id="memorize-page">
+    <h2>📖 知识点背诵（共 <span id="memo-total"></span> 个）</h2>
+    <div id="memo-controls">
+      <button class="btn btn-secondary" id="btn-toggle-kw">显示关键词</button>
+      <button class="btn" id="btn-start-quiz" style="margin-left:10px;">开始答题</button>
+    </div>
+    <ul id="memo-list"></ul>
+  </div>
+
+  <div id="quiz-page">
+    <h2>✏️ 答题中</h2>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div id="timer">用时：00:00</div>
+    <div id="questions"></div>
+    <div id="submit-area">
+      <button class="btn" id="btn-submit">提交试卷</button>
+    </div>
+  </div>
+
+  <div id="result">
+    <h2>📊 成绩单</h2>
+    <div class="score" id="final-score"></div>
+    <div class="info-line" id="result-name"></div>
+    <div class="info-line" id="result-cls"></div>
+    <div class="info-line" id="result-no"></div>
+    <div class="info-line" id="result-detail"></div>
+    <div id="wrong-area"></div>
+    <button class="btn" id="btn-retry" style="margin-top:20px;">重做一份（重新抽题）</button>
+  </div>
+</div>
+
+<script>
+var BANK = [
+  // ===== 第1课 鸦片战争 =====
+  {type:'fill',q:'鸦片战争爆发的根本原因是英国为了打开中国______。',a:'市场',lesson:1,sub:1},
+  {type:'fill',q:'虎门销烟发生在______年。',a:'1839',lesson:1,sub:1},
+  {type:'fill',q:'虎门销烟的领导人是______。',a:'林则徐',lesson:1,sub:1},
+  {type:'fill',q:'鸦片战争爆发于______年。',a:'1840',lesson:1,sub:1},
+  {type:'fill',q:'中国近代第一个不平等条约是《______》。',a:'南京条约',lesson:1,sub:1},
+  {type:'fill',q:'《南京条约》割让______给英国。',a:'香港岛',lesson:1,sub:1},
+  {type:'fill',q:'《南京条约》开放了______、______、______、______、______五处为通商口岸。',a:'广州|厦门|福州|宁波|上海',lesson:1,sub:5},
+  {type:'fill',q:'鸦片战争后，中国开始从______社会变为______社会。',a:'封建|半殖民地半封建',lesson:1,sub:2},
+  {type:'fill',q:'鸦片战争是中国______的开端。',a:'近代史',lesson:1,sub:1},
+  {type:'choice',q:'中国近代第一个不平等条约是（　　）',a:'A',opts:['A.中英《南京条约》','B.中美《望厦条约》','C.中法《黄埔条约》','D.中俄《瑷珲条约》'],lesson:1},
+  {type:'choice',q:'成为中国近代史开端的战争是（　　）',a:'A',opts:['A.鸦片战争','B.第二次鸦片战争','C.甲午中日战争','D.八国联军侵华战争'],lesson:1},
+  {type:'choice',q:'虎门销烟发生在（　　）',a:'A',opts:['A.1839年','B.1840年','C.1842年','D.1856年'],lesson:1},
+  {type:'choice',q:'《南京条约》开放的通商口岸中位于最北边的是（　　）',a:'D',opts:['A.广州','B.厦门','C.福州','D.上海'],lesson:1},
+  {type:'choice',q:'鸦片战争爆发的根本原因是（　　）',a:'B',opts:['A.林则徐虎门销烟','B.英国为了打开中国市场','C.清政府闭关锁国','D.鸦片贸易利润高'],lesson:1},
+  {type:'choice',q:'鸦片战争后中国社会性质发生的变化是（　　）',a:'C',opts:['A.从封建社会变为资本主义社会','B.从封建社会变为殖民地社会','C.从封建社会变为半殖民地半封建社会','D.从殖民地变为半殖民地半封建社会'],lesson:1},
+  {type:'choice',q:'英国发动鸦片战争的时间是（　　）',a:'B',opts:['A.1839年','B.1840年','C.1842年','D.1856年'],lesson:1},
+  {type:'choice',q:'《南京条约》中割让给英国的地区是（　　）',a:'B',opts:['A.台湾岛','B.香港岛','C.澳门','D.澎湖列岛'],lesson:1},
+  {type:'choice',q:'鸦片战争后中国被迫开放的通商口岸分布在（　　）',a:'A',opts:['A.东南沿海','B.长江流域','C.华北地区','D.东北地区'],lesson:1},
+
+  // ===== 第2课 第二次鸦片战争 =====
+  {type:'fill',q:'第二次鸦片战争爆发于______年。',a:'1856',lesson:2,sub:1},
+  {type:'fill',q:'发动第二次鸦片战争的国家是______和______。',a:'英国|法国',lesson:2,sub:2},
+  {type:'fill',q:'第二次鸦片战争中，______联军火烧圆明园。',a:'英法',lesson:2,sub:1},
+  {type:'fill',q:'第二次鸦片战争前后，______割占中国北方大片领土。',a:'俄国',lesson:2,sub:1},
+  {type:'fill',q:'第二次鸦片战争签订的条约包括《______》和《______》。',a:'天津条约|北京条约',lesson:2,sub:2},
+  {type:'fill',q:'第二次鸦片战争使中国的半殖民地化程度______。',a:'进一步加深',lesson:2,sub:1},
+  {type:'choice',q:'发动第二次鸦片战争的国家是（　　）',a:'A',opts:['A.英国和法国','B.英国和美国','C.法国和俄国','D.英国和俄国'],lesson:2},
+  {type:'choice',q:'火烧圆明园发生在（　　）',a:'C',opts:['A.鸦片战争中','B.甲午中日战争中','C.第二次鸦片战争中','D.八国联军侵华战争中'],lesson:2},
+  {type:'choice',q:'第二次鸦片战争前后割占中国北方大片领土的国家是（　　）',a:'D',opts:['A.英国','B.法国','C.日本','D.俄国'],lesson:2},
+  {type:'choice',q:'第二次鸦片战争爆发的根本原因是（　　）',a:'B',opts:['A.进一步打开中国市场','B.进一步打开中国市场，扩大侵略权益','C.报复清政府','D.争夺殖民地'],lesson:2},
+  {type:'choice',q:'第二次鸦片战争期间，趁火打劫割占中国领土最多的国家是（　　）',a:'D',opts:['A.英国','B.法国','C.美国','D.俄国'],lesson:2},
+  {type:'choice',q:'第二次鸦片战争后中国半殖民地化程度（　　）',a:'B',opts:['A.开始沦为','B.进一步加深','C.大大加深','D.完全沦为'],lesson:2},
+
+  // ===== 第3课 太平天国运动 =====
+  {type:'fill',q:'太平天国运动爆发于______年。',a:'1851',lesson:3,sub:1},
+  {type:'fill',q:'太平天国运动的领导人是______。',a:'洪秀全',lesson:3,sub:1},
+  {type:'fill',q:'太平天国定都______（今南京）。',a:'天京',lesson:3,sub:1},
+  {type:'fill',q:'太平天国颁布的纲领性文件是《______》。',a:'天朝田亩制度',lesson:3,sub:1},
+  {type:'fill',q:'太平天国运动失败的标志是______陷落。',a:'天京',lesson:3,sub:1},
+  {type:'fill',q:'太平天国运动是中国历史上规模最宏大的______战争。',a:'农民',lesson:3,sub:1},
+  {type:'choice',q:'太平天国运动的领导人是（　　）',a:'C',opts:['A.林则徐','B.李鸿章','C.洪秀全','D.曾国藩'],lesson:3},
+  {type:'choice',q:'太平天国定都的地点是（　　）',a:'B',opts:['A.北京','B.天京（今南京）','C.武汉','D.杭州'],lesson:3},
+  {type:'choice',q:'太平天国运动失败的标志是（　　）',a:'A',opts:['A.天京陷落','B.安庆失守','C.北伐失败','D.洪秀全病逝'],lesson:3},
+  {type:'choice',q:'太平天国运动的性质是（　　）',a:'D',opts:['A.资产阶级革命','B.无产阶级革命','C.地主阶级自救运动','D.农民战争'],lesson:3},
+  {type:'choice',q:'太平天国运动爆发于（　　）',a:'A',opts:['A.1851年','B.1853年','C.1856年','D.1860年'],lesson:3},
+  {type:'choice',q:'太平天国运动失败的根本原因是（　　）',a:'C',opts:['A.中外反动势力联合镇压','B.领导集团内讧','C.农民阶级的局限性','D.战略失误'],lesson:3},
+
+  // ===== 第4课 洋务运动 =====
+  {type:'fill',q:'洋务运动发生在______世纪______年代到______年代。',a:'19|60|90',lesson:4,sub:3},
+  {type:'fill',q:'洋务运动的代表人物在中央是______。',a:'奕䜣',lesson:4,sub:1},
+  {type:'fill',q:'洋务派在地方的代表有______、______、______、______等。',a:'曾国藩|李鸿章|左宗棠|张之洞',lesson:4,sub:4},
+  {type:'fill',q:'洋务运动前期以"______"为口号，创办军事工业。',a:'自强',lesson:4,sub:1},
+  {type:'fill',q:'洋务运动后期以"______"为口号，创办民用工业。',a:'求富',lesson:4,sub:1},
+  {type:'fill',q:'洋务派创办的近代海军中，规模最大的是______。',a:'北洋舰队',lesson:4,sub:1},
+  {type:'fill',q:'洋务派创办的新式学堂中，最著名的是______。',a:'京师同文馆',lesson:4,sub:1},
+  {type:'fill',q:'洋务运动是中国______的开端。',a:'近代化',lesson:4,sub:1},
+  {type:'fill',q:'洋务运动失败的根本原因是只学______不变______。',a:'技术|制度',lesson:4,sub:2},
+  {type:'choice',q:'洋务运动的口号是（　　）',a:'B',opts:['A.民主与科学','B.自强与求富','C.变法图强','D.三民主义'],lesson:4},
+  {type:'choice',q:'洋务运动在中央的代表人物是（　　）',a:'A',opts:['A.奕䜣','B.曾国藩','C.李鸿章','D.左宗棠'],lesson:4},
+  {type:'choice',q:'洋务派创办的近代海军中规模最大的是（　　）',a:'C',opts:['A.南洋舰队','B.福建舰队','C.北洋舰队','D.广东舰队'],lesson:4},
+  {type:'choice',q:'洋务运动失败的根本原因是（　　）',a:'D',opts:['A.资金不足','B.人才缺乏','C.外国势力破坏','D.只学技术不变制度'],lesson:4},
+  {type:'choice',q:'洋务派创办的第一所新式学堂是（　　）',a:'A',opts:['A.京师同文馆','B.福州船政学堂','C.天津水师学堂','D.江南制造局附设学堂'],lesson:4},
+  {type:'choice',q:'洋务派创办的军事工业不包括（　　）',a:'D',opts:['A.安庆内军械所','B.江南制造总局','C.福州船政局','D.汉阳铁厂'],lesson:4},
+
+  // ===== 第5课 甲午中日战争与列强瓜分中国狂潮 =====
+  {type:'fill',q:'甲午中日战争爆发于______年。',a:'1894',lesson:5,sub:1},
+  {type:'fill',q:'甲午中日战争中，______舰管带邓世昌壮烈殉国。',a:'致远',lesson:5,sub:1},
+  {type:'fill',q:'甲午中日战争中北洋舰队全军覆没的战役是______。',a:'威海卫战役',lesson:5,sub:1},
+  {type:'fill',q:'甲午中日战争后签订的条约是《______》。',a:'马关条约',lesson:5,sub:1},
+  {type:'fill',q:'《马关条约》割让______、______、______给日本。',a:'辽东半岛|台湾|澎湖列岛',lesson:5,sub:3},
+  {type:'fill',q:'《马关条约》允许日本在通商口岸开设______。',a:'工厂',lesson:5,sub:1},
+  {type:'fill',q:'《马关条约》使外国侵略势力进一步深入中国______。',a:'腹地',lesson:5,sub:1},
+  {type:'fill',q:'甲午中日战争后，列强掀起了______中国的狂潮。',a:'瓜分',lesson:5,sub:1},
+  {type:'choice',q:'甲午中日战争爆发的年份是（　　）',a:'A',opts:['A.1894年','B.1895年','C.1896年','D.1900年'],lesson:5},
+  {type:'choice',q:'甲午中日战争中壮烈殉国的致远舰管带是（　　）',a:'B',opts:['A.丁汝昌','B.邓世昌','C.刘步蟾','D.林永升'],lesson:5},
+  {type:'choice',q:'甲午中日战争后签订的条约是（　　）',a:'B',opts:['A.《南京条约》','B.《马关条约》','C.《北京条约》','D.《辛丑条约》'],lesson:5},
+  {type:'choice',q:'《马关条约》割让给日本的不包括（　　）',a:'D',opts:['A.辽东半岛','B.台湾','C.澎湖列岛','D.香港岛'],lesson:5},
+  {type:'choice',q:'甲午中日战争后列强掀起了（　　）',a:'A',opts:['A.瓜分中国的狂潮','B.瓜分中国的狂潮','C.瓜分中国的狂潮','D.瓜分中国的狂潮'],lesson:5},
+
+  // ===== 第6课 戊戌变法 =====
+  {type:'fill',q:'戊戌变法发生在______年。',a:'1898',lesson:6,sub:1},
+  {type:'fill',q:'戊戌变法的领导人是______和______。',a:'康有为|梁启超',lesson:6,sub:2},
+  {type:'fill',q:'戊戌变法开始的标志是光绪帝颁布《______》。',a:'定国是诏',lesson:6,sub:1},
+  {type:'fill',q:'戊戌变法历时______天，又称"百日维新"。',a:'103',lesson:6,sub:1},
+  {type:'fill',q:'戊戌变法失败的标志是______政变。',a:'戊戌政变',lesson:6,sub:1},
+  {type:'fill',q:'戊戌变法中甘愿为变法流血牺牲的是______。',a:'谭嗣同',lesson:6,sub:1},
+  {type:'fill',q:'戊戌变法是一次______阶级性质的改良运动。',a:'资产阶级',lesson:6,sub:1},
+  {type:'choice',q:'戊戌变法发生的年份是（　　）',a:'C',opts:['A.1895年','B.1896年','C.1898年','D.1900年'],lesson:6},
+  {type:'choice',q:'戊戌变法的领导人是（　　）',a:'A',opts:['A.康有为和梁启超','B.康有为和谭嗣同','C.梁启超和谭嗣同','D.康有为和严复'],lesson:6},
+  {type:'choice',q:'戊戌变法历时（　　）',a:'B',opts:['A.100天','B.103天','C.108天','D.110天'],lesson:6},
+  {type:'choice',q:'戊戌变法失败的标志是（　　）',a:'B',opts:['A.光绪帝被囚','B.戊戌政变','C.谭嗣同被杀','D.维新派逃亡'],lesson:6},
+  {type:'choice',q:'戊戌变法中甘愿为变法流血牺牲的是（　　）',a:'C',opts:['A.康有为','B.梁启超','C.谭嗣同','D.杨锐'],lesson:6},
+  {type:'choice',q:'戊戌变法的性质是（　　）',a:'B',opts:['A.地主阶级自救运动','B.资产阶级改良运动','C.资产阶级革命运动','D.农民战争'],lesson:6},
+  {type:'choice',q:'戊戌变法开始的标志是（　　）',a:'A',opts:['A.光绪帝颁布《定国是诏》','B.公车上书','C.强学会成立','D.保国会成立'],lesson:6},
+];
+
+// 知识点列表
+var KPOINTS = BANK.map(function(item) {
+  if (item.type === 'fill') {
+    return { text: item.q, answers: item.a.split('|'), isChoice: false };
+  } else {
+    var correctIdx = item.a.charCodeAt(0) - 65;
+    var correctText = item.opts[correctIdx] ? item.opts[correctIdx].substring(2) : '';
+    return { text: item.q + '（正确答案：______）', answers: [correctText], isChoice: true };
+  }
+});
+
+var currentQuiz = [];
+var startTime = 0;
+var timerInterval = null;
+var kwRevealed = false;
+
+var elCls = document.getElementById('cls');
+var elNm = document.getElementById('nm');
+var elNo = document.getElementById('no');
+var btnStartMemo = document.getElementById('btn-start-memo');
+var memoPage = document.getElementById('memorize-page');
+var memoList = document.getElementById('memo-list');
+var btnToggleKw = document.getElementById('btn-toggle-kw');
+var btnStartQuiz = document.getElementById('btn-start-quiz');
+var quizPage = document.getElementById('quiz-page');
+var questionsDiv = document.getElementById('questions');
+var progressFill = document.getElementById('progress-fill');
+var timerDiv = document.getElementById('timer');
+var btnSubmit = document.getElementById('btn-submit');
+var resultDiv = document.getElementById('result');
+var btnRetry = document.getElementById('btn-retry');
+
+function checkInfo() {
+  btnStartMemo.disabled = !(elCls.value.trim() && elNm.value.trim() && elNo.value.trim());
+}
+elCls.addEventListener('input', checkInfo);
+elNm.addEventListener('input', checkInfo);
+elNo.addEventListener('input', checkInfo);
+
+btnStartMemo.addEventListener('click', function() {
+  document.getElementById('info-bar').style.display = 'none';
+  memoPage.style.display = 'block';
+  document.getElementById('memo-total').textContent = KPOINTS.length;
+  renderMemo();
+  kwRevealed = false;
+  btnToggleKw.textContent = '显示关键词';
+});
+
+function renderMemo() {
+  memoList.innerHTML = '';
+  for (var i = 0; i < KPOINTS.length; i++) {
+    var li = document.createElement('li');
+    var kp = KPOINTS[i];
+    if (!kp.isChoice && kp.answers.length > 0) {
+      var html = '';
+      var parts = kp.text.split('______');
+      for (var j = 0; j < parts.length; j++) {
+        html += escapeHtml(parts[j]);
+        if (j < kp.answers.length) {
+          html += '<span class="kw-blank" data-ans="' + escapeHtml(kp.answers[j]) + '">　　　　</span>';
+        }
+      }
+      li.innerHTML = (i+1) + '. ' + html;
+    } else if (kp.isChoice) {
+      // 选择题：题干 + 遮罩的答案
+      var qText = kp.text.replace('（正确答案：______）', '');
+      li.innerHTML = (i+1) + '. ' + escapeHtml(qText) + '（正确答案：<span class="kw-blank" data-ans="' + escapeHtml(kp.answers[0]) + '">　　　　</span>）';
+    }
+    memoList.appendChild(li);
+  }
+}
+
+function escapeHtml(text) {
+  var div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+btnToggleKw.addEventListener('click', function() {
+  var blanks = memoList.querySelectorAll('.kw-blank');
+  if (!kwRevealed) {
+    for (var i = 0; i < blanks.length; i++) {
+      var ans = blanks[i].getAttribute('data-ans');
+      if (ans) {
+        blanks[i].textContent = ans;
+        blanks[i].classList.add('revealed');
+      }
+    }
+    btnToggleKw.textContent = '隐藏关键词';
+    kwRevealed = true;
+  } else {
+    for (var i = 0; i < blanks.length; i++) {
+      blanks[i].textContent = '　　　　';
+      blanks[i].classList.remove('revealed');
+    }
+    btnToggleKw.textContent = '显示关键词';
+    kwRevealed = false;
+  }
+});
+
+btnStartQuiz.addEventListener('click', function() {
+  memoPage.style.display = 'none';
+  quizPage.style.display = 'block';
+  startQuiz();
+});
+
+function startQuiz() {
+  currentQuiz = shuffle(BANK.slice()).slice(0, 30);
+  questionsDiv.innerHTML = '';
+  startTime = Date.now();
+
+  for (var i = 0; i < currentQuiz.length; i++) {
+    var q = currentQuiz[i];
+    var div = document.createElement('div');
+    div.className = 'q-item';
+    div.id = 'q-' + i;
+
+    var qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.textContent = (i+1) + '. ' + q.q;
+    div.appendChild(qText);
+
+    if (q.type === 'fill') {
+      var ansArr = q.a.split('|');
+      if (ansArr.length === 1) {
+        // 单空
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'ans-' + i + '-0';
+        input.placeholder = '请填写答案';
+        input.addEventListener('input', updateProgress);
+        div.appendChild(input);
+      } else {
+        // 多空：拆成独立输入框
+        var subDiv = document.createElement('div');
+        subDiv.className = 'sub-inputs';
+        for (var s = 0; s < ansArr.length; s++) {
+          var subInput = document.createElement('input');
+          subInput.type = 'text';
+          subInput.id = 'ans-' + i + '-' + s;
+          subInput.placeholder = '第' + (s+1) + '空';
+          subInput.addEventListener('input', updateProgress);
+          subDiv.appendChild(subInput);
+        }
+        div.appendChild(subDiv);
+      }
+    } else {
+      var optsDiv = document.createElement('div');
+      optsDiv.className = 'opts';
+      for (var j = 0; j < q.opts.length; j++) {
+        var letter = String.fromCharCode(65+j);
+        var label = document.createElement('label');
+        label.innerHTML = '<input type="radio" name="ans-' + i + '" value="' + letter + '" onchange="updateProgress()"> ' + q.opts[j];
+        optsDiv.appendChild(label);
+      }
+      div.appendChild(optsDiv);
+    }
+
+    var refDiv = document.createElement('div');
+    refDiv.className = 'ref-answer';
+    refDiv.id = 'ref-' + i;
+    if (q.type === 'choice') {
+      var correctIdx = q.a.charCodeAt(0) - 65;
+      refDiv.textContent = '正确答案：' + q.a + '．' + (q.opts[correctIdx] ? q.opts[correctIdx].substring(2) : '');
+    } else {
+      refDiv.textContent = '正确答案：' + q.a.replace(/\|/g, '、');
+    }
+    div.appendChild(refDiv);
+
+    questionsDiv.appendChild(div);
+  }
+
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+  updateProgress();
+}
+
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;
+  }
+  return arr;
+}
+
+function updateTimer() {
+  var elapsed = Math.floor((Date.now() - startTime) / 1000);
+  var mins = Math.floor(elapsed / 60);
+  var secs = elapsed % 60;
+  timerDiv.textContent = '用时：' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+}
+
+function updateProgress() {
+  var answered = 0;
+  for (var i = 0; i < currentQuiz.length; i++) {
+    var q = currentQuiz[i];
+    if (q.type === 'fill') {
+      var ansArr = q.a.split('|');
+      if (ansArr.length === 1) {
+        var input = document.getElementById('ans-' + i + '-0');
+        if (input && input.value.trim()) answered++;
+      } else {
+        var filled = 0;
+        for (var s = 0; s < ansArr.length; s++) {
+          var si = document.getElementById('ans-' + i + '-' + s);
+          if (si && si.value.trim()) filled++;
+        }
+        if (filled > 0) answered++;
+      }
+    } else {
+      var radios = document.querySelectorAll('input[name="ans-' + i + '"]:checked');
+      if (radios.length > 0) answered++;
+    }
+  }
+  progressFill.style.width = Math.round(answered / currentQuiz.length * 100) + '%';
+}
+
+btnSubmit.addEventListener('click', function() {
+  var unanswered = 0;
+  for (var i = 0; i < currentQuiz.length; i++) {
+    var q = currentQuiz[i];
+    if (q.type === 'fill') {
+      var ansArr = q.a.split('|');
+      if (ansArr.length === 1) {
+        var input = document.getElementById('ans-' + i + '-0');
+        if (!input || !input.value.trim()) unanswered++;
+      } else {
+        var allEmpty = true;
+        for (var s = 0; s < ansArr.length; s++) {
+          var si = document.getElementById('ans-' + i + '-' + s);
+          if (si && si.value.trim()) { allEmpty = false; break; }
+        }
+        if (allEmpty) unanswered++;
+      }
+    } else {
+      var radios = document.querySelectorAll('input[name="ans-' + i + '"]:checked');
+      if (radios.length === 0) unanswered++;
+    }
+  }
+
+  if (unanswered > 0) {
+    if (!confirm('还有 ' + unanswered + ' 题未作答，确定要提交吗？')) return;
+  }
+
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  var totalScore = 0;
+  var correctCount = 0;
+  var wrongList = [];
+
+  for (var i = 0; i < currentQuiz.length; i++) {
+    var q = currentQuiz[i];
+    var div = document.getElementById('q-' + i);
+    var isCorrect = false;
+    var pts = (i < 25) ? 3 : 5;
+
+    if (q.type === 'fill') {
+      var ansArr = q.a.split('|');
+      if (ansArr.length === 1) {
+        var input = document.getElementById('ans-' + i + '-0');
+        var userAns = input ? input.value.trim() : '';
+        if (userAns === q.a) {
+          totalScore += pts;
+          correctCount++;
+          isCorrect = true;
+        }
+      } else {
+        // 多空：每空单独计分
+        var subPts = pts / ansArr.length;
+        var subCorrect = 0;
+        for (var s = 0; s < ansArr.length; s++) {
+          var si = document.getElementById('ans-' + i + '-' + s);
+          var sv = si ? si.value.trim() : '';
+          if (sv === ansArr[s]) {
+            subCorrect++;
+          }
+        }
+        var earned = subCorrect * subPts;
+        totalScore += earned;
+        if (subCorrect === ansArr.length) {
+          correctCount++;
+          isCorrect = true;
+        }
+      }
+    } else {
+      var checked = document.querySelector('input[name="ans-' + i + '"]:checked');
+      var userAns = checked ? checked.value : '';
+      if (userAns === q.a) {
+        totalScore += pts;
+        correctCount++;
+        isCorrect = true;
+      }
+    }
+
+    if (isCorrect) {
+      div.classList.add('correct');
+    } else {
+      div.classList.add('wrong');
+      var refDiv = document.getElementById('ref-' + i);
+      if (refDiv) refDiv.style.display = 'block';
+
+      var displayCorrect = '';
+      if (q.type === 'choice') {
+        var correctIdx = q.a.charCodeAt(0) - 65;
+        displayCorrect = q.a + '．' + (q.opts[correctIdx]||'').substring(2);
+      } else {
+        displayCorrect = q.a.replace(/\|/g,'、');
+      }
+
+      wrongList.push({
+        idx: i+1,
+        q: q.q,
+        correct: displayCorrect
+      });
+    }
+  }
+
+  // 四舍五入总分
+  totalScore = Math.round(totalScore);
+
+  quizPage.style.display = 'none';
+  resultDiv.style.display = 'block';
+
+  document.getElementById('final-score').textContent = totalScore + ' / 100';
+  document.getElementById('result-name').textContent = '姓名：' + elNm.value.trim();
+  document.getElementById('result-cls').textContent = '班级：' + elCls.value.trim();
+  document.getElementById('result-no').textContent = '座号：' + elNo.value.trim();
+
+  var elapsed = Math.floor((Date.now() - startTime) / 1000);
+  var mins = Math.floor(elapsed / 60);
+  var secs = elapsed % 60;
+  document.getElementById('result-detail').textContent = '正确：' + correctCount + '/' + currentQuiz.length + '　用时：' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+
+  if (wrongList.length === 0) {
+    document.getElementById('wrong-area').innerHTML = '<div style="color:#0a0;font-weight:bold;margin-top:15px;">全部正确，满分！</div>';
+  } else {
+    var html = '<div class="wrong-list"><h3>错题明细</h3><ul>';
+    for (var w = 0; w < wrongList.length; w++) {
+      html += '<li><b>第' + wrongList[w].idx + '题</b>：' + wrongList[w].q + '<br>正确答案：' + wrongList[w].correct + '</li>';
+    }
+    html += '</ul></div>';
+    document.getElementById('wrong-area').innerHTML = html;
+  }
+});
+
+btnRetry.addEventListener('click', function() {
+  resultDiv.style.display = 'none';
+  memoPage.style.display = 'block';
+  kwRevealed = false;
+  btnToggleKw.textContent = '显示关键词';
+  renderMemo();
+});
+</script>
+</body>
+</html>
